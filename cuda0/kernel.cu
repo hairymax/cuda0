@@ -15,7 +15,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 int main()
 {
     const int arraySize = 5;
-    const int a[arraySize] = { 1, 2, 3, 4, 5 };
+    const int a[arraySize] = { 4, 1, 3, 2, 5 };
     const int b[arraySize] = { 10, 20, 30, 40, 50 };
     int c[arraySize] = { 0 };
 
@@ -114,8 +114,12 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
 
 Error:
     cudaFree(dev_c);
-    cudaFree(dev_a);
+    
+	cudaFree(dev_a);
+
     cudaFree(dev_b);
     
     return cudaStatus;
+
+	// раз раз
 }
