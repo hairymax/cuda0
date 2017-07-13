@@ -4,23 +4,59 @@
 
 #include <stdio.h>
 
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
+#define size 10
+
+cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int arrsize);
 
 __global__ void addKernel(int *c, const int *a, const int *b)
 {
-    int i = threadIdx.x;
+	//int a[size];
+	int i = threadIdx.x;
+	//
+	1 + 1;
     c[i] = a[i] + b[i];
+	 
+
+	printf("gridDim %d,%d\n", gridDim.x, gridDim.y);
 }
 
 int main()
 {
-    const int arraySize = 5;
-    const int a[arraySize] = { 4, 1, 3, 2, 5 };
-    const int b[arraySize] = { 10, 20, 30, 40, 50 };
-    int c[arraySize] = { 0 };
+	int            deviceCount;
+	cudaDeviceProp devProp;
+
+	cudaGetDeviceCount(&deviceCount);
+
+	printf("Found %d devices\n", deviceCount);
+
+	for (int device = 0; device < deviceCount; device++)
+	{
+		cudaGetDeviceProperties(&devProp, device);
+
+		printf("Device %d\n", device);
+		printf("Compute capability     : %d.%d\n", devProp.major, devProp.minor);
+		printf("Name                   : %s\n", devProp.name);
+		printf("Total Global Memory    : %d\n", devProp.totalGlobalMem);
+		printf("Shared memory per block: %d\n", devProp.sharedMemPerBlock);
+		printf("Registers per block    : %d\n", devProp.regsPerBlock);
+		printf("Warp size              : %d\n", devProp.warpSize);
+		printf("Max threads per block  : %d\n", devProp.maxThreadsPerBlock);
+		printf("Max threads dimension  : %d\n", devProp.maxThreadsDim);
+		printf("Max grid size          : %d\n", devProp.maxGridSize);
+		printf("Max threads per proc   : %d\n", devProp.maxThreadsPerMultiProcessor);
+
+		printf("Total constant memory  : %d\n", devProp.totalConstMem);
+		printf("Processor Count  : %d\n", devProp.multiProcessorCount);
+	}
+
+	//return 0;
+	
+	const int a[size] = { 4, 1, 3, 2, 5 };
+    const int b[size] = { 10, 20, 30, 40, 50 };
+    int c[size] = { 0 };
 
     // Add vectors in parallel.
-    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
+    cudaError_t cudaStatus = addWithCuda(c, a, b, size);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "addWithCuda failed!");
         return 1;
@@ -28,6 +64,7 @@ int main()
 
     printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
         c[0], c[1], c[2], c[3], c[4]);
+
 
     // cudaDeviceReset must be called before exiting in order for profiling and
     // tracing tools such as Nsight and Visual Profiler to show complete traces.
@@ -41,7 +78,7 @@ int main()
 }
 
 // Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
+cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int arrsize)
 {
     int *dev_a = 0;
     int *dev_b = 0;
