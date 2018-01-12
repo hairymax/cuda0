@@ -17,7 +17,7 @@
 const int N = 396;
 const int arr_size = N*N;
 
-// функция считывания элементов комплексного вектора из бинарного файла
+// ГґГіГ­Д™Г¶ДЌЛ™ Е„Г·ДЌЕ€Е±ГўЕ•Г­ДЌЛ™ ГЅГ«ДєД›ДєГ­Е€Г®Гў Д™Г®Д›ДЏГ«ДєД™Е„Г­Г®ДѓГ® ГўДєД™Е€Г®Д‘Е• ДЌГ§ ГЎДЌГ­Е•Д‘Г­Г®ДѓГ® ГґЕ•Г©Г«Е•
 void readComplexArrayFromFile(cuDoubleComplex * arr, const char * fname) {
 	FILE *infile = NULL;
 	infile = fopen(fname, "rb");
@@ -32,10 +32,10 @@ void readComplexArrayFromFile(cuDoubleComplex * arr, const char * fname) {
 		fread(&arr[i].y, sizeof(double), 1, infile);
 		//printf("[%d,%d]:    Re = %26.18e,   Im = %26.18e\n", i/N+1, i%N+1, cuCreal(arr[i]), cuCimag(arr[i]));
 	}
-	fclose(infile);
+	fclose(infile); 
 }
 
-// Запись элементов собственного вектора, соответсвующего определённой энергии, в текстовый фвйл
+// Г‡Е•ДЏДЌЕ„Гј ГЅГ«ДєД›ДєГ­Е€Г®Гў Е„Г®ГЎЕ„Е€ГўДєГ­Г­Г®ДѓГ® ГўДєД™Е€Г®Д‘Е•, Е„Г®Г®Е€ГўДєЕ€Е„ГўГіЕЈЕЇДєДѓГ® Г®ДЏД‘ДєГ¤ДєГ«ВёГ­Г­Г®Г© ГЅГ­ДєД‘ДѓДЌДЌ, Гў Е€ДєД™Е„Е€Г®ГўЕ±Г© ГґГўГ©Г«
 void writeComplexArrayToFile(cuDoubleComplex * Varr, double * lambda, const int index, const char * fpath) {
 	char ind_str[3]; itoa(index, ind_str, 10);
 	char fname[50];
@@ -60,33 +60,33 @@ void writeComplexArrayToFile(cuDoubleComplex * Varr, double * lambda, const int 
 
 int main()
 {	
-	// создаём события для подсчёта времени вычисления
+	// Е„Г®Г§Г¤Е•ВёД› Е„Г®ГЎЕ±Е€ДЌЛ™ Г¤Г«Л™ ДЏГ®Г¤Е„Г·ВёЕ€Е• ГўД‘ДєД›ДєГ­ДЌ ГўЕ±Г·ДЌЕ„Г«ДєГ­ДЌЛ™
 	cudaEvent_t start, stop;
 	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 	
 	cudaEventRecord(start, 0);
-	// шаг 1: считываем данные из файлов
+	// Е™Е•Дѓ 1: Е„Г·ДЌЕ€Е±ГўЕ•ДєД› Г¤Е•Г­Г­Е±Дє ДЌГ§ ГґЕ•Г©Г«Г®Гў
 	printf("1. Reading data from files\n");
 	cuDoubleComplex * A = new cuDoubleComplex[arr_size];
 	cuDoubleComplex * B = new cuDoubleComplex[arr_size];
 
-	// чтение матриц из файлов
+	// Г·Е€ДєГ­ДЌДє Д›Е•Е€Д‘ДЌГ¶ ДЌГ§ ГґЕ•Г©Г«Г®Гў
 	readComplexArrayFromFile(A, "A.dat");
 	readComplexArrayFromFile(B, "B.dat");
 	
-	cusolverDnHandle_t cusolverH = NULL;  // указатель на содержимое библиотеки cuSolverDN.
-	cusolverStatus_t cusolver_status = CUSOLVER_STATUS_SUCCESS; // результат выполения функции
-	cudaError_t cudaStat1 = cudaSuccess;  // статус операций
+	cusolverDnHandle_t cusolverH = NULL;  // ГіД™Е•Г§Е•Е€ДєГ«Гј Г­Е• Е„Г®Г¤ДєД‘Д‡ДЌД›Г®Дє ГЎДЌГЎГ«ДЌГ®Е€ДєД™ДЌ cuSolverDN.
+	cusolverStatus_t cusolver_status = CUSOLVER_STATUS_SUCCESS; // Д‘ДєГ§ГіГ«ГјЕ€Е•Е€ ГўЕ±ДЏГ®Г«ДєГ­ДЌЛ™ ГґГіГ­Д™Г¶ДЌДЌ
+	cudaError_t cudaStat1 = cudaSuccess;  // Е„Е€Е•Е€ГіЕ„ Г®ДЏДєД‘Е•Г¶ДЌГ©
 	cudaError_t cudaStat2 = cudaSuccess;
 	cudaError_t cudaStat3 = cudaSuccess;
 	cudaError_t cudaStat4 = cudaSuccess;
 
-	int info_gpu = 0;   // 0 - это хорошо
+	int info_gpu = 0;   // 0 - ГЅЕ€Г® Е‘Г®Д‘Г®Е™Г®
 		
-	cuDoubleComplex * V = new cuDoubleComplex[arr_size]; // Собственные векторы
-	double W[N];     // Собственные значения
+	cuDoubleComplex * V = new cuDoubleComplex[arr_size]; // ЕѓГ®ГЎЕ„Е€ГўДєГ­Г­Е±Дє ГўДєД™Е€Г®Д‘Е±
+	double W[N];     // ЕѓГ®ГЎЕ„Е€ГўДєГ­Г­Е±Дє Г§Г­Е•Г·ДєГ­ДЌЛ™
 
 	cuDoubleComplex *d_A = NULL;
 	cuDoubleComplex *d_B = NULL;
@@ -96,13 +96,13 @@ int main()
 	int  lwork = 0;
 	//printf("\nBEFORE hegvd: info_gpu = %d\n", info_gpu);
 	
-	// Вызов решателя
+	// Г‚Е±Г§Г®Гў Д‘ДєЕ™Е•Е€ДєГ«Л™
 
-	// Создаём указатель на cusolver/cublas
+	// ЕѓГ®Г§Г¤Е•ВёД› ГіД™Е•Г§Е•Е€ДєГ«Гј Г­Е• cusolver/cublas
 	cusolver_status = cusolverDnCreate(&cusolverH);
 	assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
 
-	// шаг 2: копирование матриц A и B на видеокарту
+	// Е™Е•Дѓ 2: Д™Г®ДЏДЌД‘Г®ГўЕ•Г­ДЌДє Д›Е•Е€Д‘ДЌГ¶ A ДЌ B Г­Е• ГўДЌГ¤ДєГ®Д™Е•Д‘Е€Гі
 	printf("2. Copying matricies A and B to device\n");
 	cudaStat1 = cudaMalloc((void**)&d_A, sizeof(cuDoubleComplex) * arr_size);
 	cudaStat2 = cudaMalloc((void**)&d_B, sizeof(cuDoubleComplex) * arr_size);
@@ -116,11 +116,11 @@ int main()
 	cudaStat2 = cudaMemcpy(d_B, B, sizeof(cuDoubleComplex) * arr_size, cudaMemcpyHostToDevice);
 	assert(cudaSuccess == cudaStat1);
 
-	// шаг 3: запрос для рабочего пространства команды hegvd
+	// Е™Е•Дѓ 3: Г§Е•ДЏД‘Г®Е„ Г¤Г«Л™ Д‘Е•ГЎГ®Г·ДєДѓГ® ДЏД‘Г®Е„Е€Д‘Е•Г­Е„Е€ГўЕ• Д™Г®Д›Е•Г­Г¤Е± hegvd
 	printf("3. Query working space of Zhegvd\n");
-	cusolverEigMode_t jobz  = CUSOLVER_EIG_MODE_VECTOR; // VECTOR - Вычислять СЗ и СВ, NOVECTOR - только СЗ.
+	cusolverEigMode_t jobz  = CUSOLVER_EIG_MODE_VECTOR; // VECTOR - Г‚Е±Г·ДЌЕ„Г«Л™Е€Гј ЕѓГ‡ ДЌ ЕѓГ‚, NOVECTOR - Е€Г®Г«ГјД™Г® ЕѓГ‡.
 	cublasFillMode_t  uplo  = CUBLAS_FILL_MODE_LOWER;
-	cusolverEigType_t itype = CUSOLVER_EIG_TYPE_1;      // решается задача типа A*x = lambda*B*x
+	cusolverEigType_t itype = CUSOLVER_EIG_TYPE_1;      // Д‘ДєЕ™Е•ДєЕ€Е„Л™ Г§Е•Г¤Е•Г·Е• Е€ДЌДЏЕ• A*x = lambda*B*x
 	cusolver_status = cusolverDnZhegvd_bufferSize( //cusolverDnDsyevd_bufferSize(
 		cusolverH, itype, jobz,	uplo,
 		N, d_A, N, d_B, N, d_W,
@@ -130,7 +130,7 @@ int main()
 	cudaStat1 = cudaMalloc((void**)&d_work, sizeof(cuDoubleComplex)*lwork);
 	assert(cudaSuccess == cudaStat1);
 
-	// шаг 4: Вычисление
+	// Е™Е•Дѓ 4: Г‚Е±Г·ДЌЕ„Г«ДєГ­ДЌДє
 	printf("4. Calculating\n");
 	cusolver_status = cusolverDnZhegvd( //Dsyevd(
 		cusolverH, itype, jobz,	uplo,
@@ -141,7 +141,7 @@ int main()
 	assert(CUSOLVER_STATUS_SUCCESS == cusolver_status);
 	assert(cudaSuccess == cudaStat1);
 
-	// копируем полученные данные с видеокарты на хост
+	// Д™Г®ДЏДЌД‘ГіДєД› ДЏГ®Г«ГіГ·ДєГ­Г­Е±Дє Г¤Е•Г­Г­Е±Дє Е„ ГўДЌГ¤ДєГ®Д™Е•Д‘Е€Е± Г­Е• Е‘Г®Е„Е€
 	cudaStat1 = cudaMemcpy(W, d_W, sizeof(double)*N, cudaMemcpyDeviceToHost);
 	cudaStat2 = cudaMemcpy(V, d_A, sizeof(cuDoubleComplex)*arr_size, cudaMemcpyDeviceToHost);
 	cudaStat3 = cudaMemcpy(&info_gpu, devInfo, sizeof(int), cudaMemcpyDeviceToHost);
@@ -151,13 +151,13 @@ int main()
 	//printf("AFTER hegvd: info_gpu = %d\n\n", info_gpu);
 	assert(0 == info_gpu);
 
-	// Определяем время, понадобившееся для расчётов
+	// ГЋДЏД‘ДєГ¤ДєГ«Л™ДєД› ГўД‘ДєД›Л™, ДЏГ®Г­Е•Г¤Г®ГЎДЌГўЕ™ДєДєЕ„Л™ Г¤Г«Л™ Д‘Е•Е„Г·ВёЕ€Г®Гў
 	cudaEventRecord(stop, 0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
 	printf("\nTime for calculating eigenvalues: %f ms\n\n", time);
 		
-	// Записываем собственные значения в файл
+	// Г‡Е•ДЏДЌЕ„Е±ГўЕ•ДєД› Е„Г®ГЎЕ„Е€ГўДєГ­Г­Е±Дє Г§Г­Е•Г·ДєГ­ДЌЛ™ Гў ГґЕ•Г©Г«
 	FILE *outfile = NULL;
 	outfile = fopen("eigenvalues.txt", "w+");
 	if (outfile == NULL) {
@@ -172,10 +172,10 @@ int main()
 	fclose(outfile);
 	printf("Eigenvalues are written to a file eigenvalues.txt:\n\n");
 
-	// Записываем собственный вектор для энергии с заданным номером (третий аргумент)
+	// Г‡Е•ДЏДЌЕ„Е±ГўЕ•ДєД› Е„Г®ГЎЕ„Е€ГўДєГ­Г­Е±Г© ГўДєД™Е€Г®Д‘ Г¤Г«Л™ ГЅГ­ДєД‘ДѓДЌДЌ Е„ Г§Е•Г¤Е•Г­Г­Е±Д› Г­Г®Д›ДєД‘Г®Д› (Е€Д‘ДєЕ€ДЌГ© Е•Д‘ДѓГіД›ДєГ­Е€)
 	writeComplexArrayToFile(V, W, 1, "vector");
 
-	// освобождаем память
+	// Г®Е„ГўГ®ГЎГ®Д‡Г¤Е•ДєД› ДЏЕ•Д›Л™Е€Гј
 	if (d_A) cudaFree(d_A);
 	if (d_B) cudaFree(d_A);
 	if (d_W) cudaFree(d_W);
